@@ -30,7 +30,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { Check, SquarePen, Trash2 } from 'lucide-vue-next';
-import { reactive, watch } from 'vue';
+import { reactive, ref, watch } from 'vue';
 
 const th = reactive([
     {
@@ -81,6 +81,25 @@ const CreateSubmit = () => {
     });
 };
 
+// update
+const editCtgr = ref<Category>();
+const openUpdate = (category: Category) => {
+    editCtgr.value = category
+    form.name_category = category.name_category
+}
+
+const UpdateSubmit = () =>{
+    if (!editCtgr.value) return;
+
+    form.put(route('category.update', editCtgr.value.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset("name_category")
+        }
+    })
+}
+
+// delete
 const DeleteSubmit = () => {
     form.delete(route('category.delete'));
 };
@@ -172,7 +191,7 @@ watch(
                                         <!-- update -->
                                         <Dialog>
                                             <DialogTrigger>
-                                                <Button class="bg-yellow-500 hover:bg-yellow-600"> <SquarePen /> </Button>
+                                                <Button class="bg-yellow-500 hover:bg-yellow-600" @click="openUpdate(c)"> <SquarePen /></Button>
                                             </DialogTrigger>
 
                                             <DialogContent>
@@ -182,6 +201,31 @@ watch(
                                                         Update your product category here. Click Save when finished.
                                                     </DialogDescription>
                                                 </DialogHeader>
+                                                <form @submit.prevent="UpdateSubmit">
+                                                    <fieldset>
+                                                        <!-- name category -->
+                                                        <div class="mb-5 space-y-3">
+                                                            <Label for="name_category"> Name Category </Label>
+                                                            <Input
+                                                                id="name_category"
+                                                                required
+                                                                placeholder="Enter the name category products...."
+                                                                v-model="form.name_category"
+                                                            />
+                                                            <div v-if="form.errors.name_category" class="text-sm text-red-500">
+                                                                {{ form.errors.name_category }}
+                                                            </div>
+                                                        </div>
+                                                    </fieldset>
+                                                    <DialogFooter class="mt-4">
+                                                        <DialogClose as-child>
+                                                            <Button class="bg-gray-400 p-3 hover:bg-gray-500"> Close </Button>
+                                                        </DialogClose>
+                                                        <Button type="submit" class="bg-yellow-500 p-3 hover:bg-yellow-600" :disabled="form.processing">
+                                                            Save
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </form>
                                             </DialogContent>
                                         </Dialog>
 
@@ -199,8 +243,9 @@ watch(
                                                 <AlertDialogFooter>
                                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                                     <form @submit.prevent="DeleteSubmit">
-
-                                                        <AlertDialogAction type="submit" class="bg-red-500 hover:bg-red-600"> Delete </AlertDialogAction>
+                                                        <AlertDialogAction type="submit" class="bg-red-500 hover:bg-red-600">
+                                                            Delete
+                                                        </AlertDialogAction>
                                                     </form>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>

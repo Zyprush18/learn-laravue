@@ -63,9 +63,16 @@ class CategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(CategoryRequest $request, string $id)
     {
-        //
+        try {
+            $validate = $request->validated();
+            Category::where('id', $id)->update($validate);
+            return to_route('category.index')->with(['message' => 'successfully update a product category']);
+        } catch (\Throwable $th) {
+            dd($th);
+        }
+
     }
 
     /**
@@ -73,6 +80,11 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            Category::where('id', $id)->delete();
+            return to_route('category.index')->with(['message' => 'successfully delete a product category']);
+        } catch (\Throwable $th) {
+            dd($th);
+        }
     }
 }
